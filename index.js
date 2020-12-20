@@ -7,7 +7,61 @@ const connection = mysql.createConnection({
     password: "2b.D_?rtwbjm",
     database: "greatBay_DB",
 });
+
 connection.connect(function (err) {
     if (err) throw err;
-    start();
+    console.log('Welcome...')
+    init();
 });
+
+const init = () => {
+    inquirer
+    .prompt({
+        name: "action",
+        type: "list",
+        message: "What would you like to do?",
+        choices: [
+            'View All Employees',
+            'View All Employees By Department',
+            'View All Employees By Management',
+            'Add Employee',
+            'Remove Employee',
+            'Update Employee Role',
+            'Update Employee Manager',
+            'EXIT'
+        ],
+    })
+    .then(answer => {
+        if (answer.action === 'View All Employees') {
+            console.log('\n -------------------------------------- \n');
+            allEmployees();
+        }
+        else if (answer.action === 'View All Employees By Department') {
+            console.log('\n -------------------------------------- \n');
+            allEmployeesByDepartment();
+        }
+        else if (answer.action === 'View All Employees By Management') {
+            console.log('\n -------------------------------------- \n');
+            allEmployeesByManagement();
+        }
+        else if (answer.action === 'Add Employee') {
+            console.log('\n -------------------------------------- \n');
+            addEmployee();
+        }
+        else if (answer.action === 'Remove Employee') {
+            console.log('\n -------------------------------------- \n');
+            removeEmployee();
+        }
+        else if (answer.action === 'Update Employee Role') {
+            console.log('\n -------------------------------------- \n');
+            updateRole();
+        }
+        else if (answer.action === 'Update Employee Manager') {
+            console.log('\n -------------------------------------- \n');
+            updateEmployeeManager();
+        }
+        else {
+            connection.end();
+        };
+    });
+};
