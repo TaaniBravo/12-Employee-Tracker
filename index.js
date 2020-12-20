@@ -34,15 +34,15 @@ const init = () => {
     .then(answer => {
         if (answer.action === 'View All Employees') {
             console.log('\n -------------------------------------- \n');
-            allEmployees();
+            queryAll();
         }
         else if (answer.action === 'View All Employees By Department') {
             console.log('\n -------------------------------------- \n');
-            allEmployeesByDepartment();
+            queryByDepartment();
         }
         else if (answer.action === 'View All Employees By Management') {
             console.log('\n -------------------------------------- \n');
-            allEmployeesByManagement();
+            queryByManagement();
         }
         else if (answer.action === 'Add Employee') {
             console.log('\n -------------------------------------- \n');
@@ -65,3 +65,4 @@ const init = () => {
         };
     });
 };
+
