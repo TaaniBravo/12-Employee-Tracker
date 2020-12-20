@@ -84,3 +84,31 @@ const queryAll = () => {
             });
     });
 };
+
+const queryByDepartment = () => {
+    connection.query('SELECT * FROM department', (err, res) => {
+        if (err) throw err
+        inquirer
+        .prompt({
+            name: "action",
+            type: "list",
+            message: "Which department would you like to view?",
+            choices: () => {
+                const choiceArray = [];
+                for (let i = 0; i < res.length; i++) {
+                    choiceArray.push(res[i].department_name);
+                }
+                return choiceArray;
+            }
+        })
+        .then(answer => {
+            let chosenDepartment;
+            for (let i = 0; i < res.length; i++) {
+                if(res[i].department_name === answer.action) {
+                    chosenDepartment = res[i];
+                    console.log ('hello')
+                };
+            }
+        })
+    });
+};
