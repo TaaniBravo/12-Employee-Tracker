@@ -89,26 +89,40 @@ const queryByDepartment = () => {
     connection.query('SELECT * FROM department', (err, res) => {
         if (err) throw err
         inquirer
-        .prompt({
-            name: "action",
-            type: "list",
-            message: "Which department would you like to view?",
-            choices: () => {
-                const choiceArray = [];
-                for (let i = 0; i < res.length; i++) {
-                    choiceArray.push(res[i].department_name);
+            .prompt({
+                name: "action",
+                type: "list",
+                message: "Which department would you like to view?",
+                choices: () => {
+                    const choiceArray = [];
+                    for (let i = 0; i < res.length; i++) {
+                        choiceArray.push(res[i].department_name);
+                    }
+                    return choiceArray;
                 }
-                return choiceArray;
-            }
-        })
-        .then(answer => {
-            let chosenDepartment;
-            for (let i = 0; i < res.length; i++) {
-                if(res[i].department_name === answer.action) {
-                    chosenDepartment = res[i];
-                    console.log ('hello')
-                };
-            }
-        })
+            })
+            .then(answer => {
+                let chosenDepartment;
+                for (let i = 0; i < res.length; i++) {
+                    if (res[i].department_name === answer.action) {
+                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.action], (err, res) => {
+                            if (err) throw err
+                            console.log('\n -------------------------------------- \n');
+                            console.table(res)
+                        });
+                        inquirer
+                            .prompt({
+                                name: "action",
+                                type: "list",
+                                message: "What would you like to do?",
+                                choices: ['Continue', 'EXIT']
+                            })
+                            .then(answer => {
+                                if (answer.action === 'Continue') init();
+                                else connection.end();
+                            });
+                    };
+                }
+            })
     });
 };

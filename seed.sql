@@ -35,3 +35,5 @@ FROM
   employee
   INNER JOIN role_info ON employee.role_id = role_info.id
   INNER JOIN department ON role_info.department_id = department.id
+WHERE
+  department.department_name = Engineering;
