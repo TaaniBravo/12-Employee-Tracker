@@ -81,7 +81,7 @@ const queryAll = () => {
     LEFT JOIN role_info r ON e.role_id = r.id
     LEFT JOIN department d ON r.department_id = d.id
     LEFT JOIN employee m ON m.id = e.manager_id`
-    
+
     connection.query(
         query, (err, res) => {
         if (err) throw err;
@@ -159,9 +159,29 @@ const queryByManagement = () => {
                 }
             })
             .then(answer => {
+                const query = `SELECT
+                e.id,
+                e.first_name,
+                e.last_name,
+                r.title,
+                d.department_name,
+                r.salary,
+                CONCAT(m.first_name, ' ', m.last_name) AS manager
+              FROM
+                employee e
+                LEFT JOIN role_info r ON e.role_id = r.id
+                LEFT JOIN department d ON r.department_id = d.id
+                LEFT JOIN employee m ON m.id = e.manager_id
+              WHERE
+                m.id = ?`
+                // console.log(answer.action)
                 for (let i = 0; i < res.length; i++) {
                     if (choiceArray[i] === answer.action) {
-                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM employee INNER JOIN role_info ON employee.role_id = role_info.id INNER JOIN department ON role_info.department_id = department.id;', [answer.action], (err, res) => {
+                        connection.query(query, 
+                            [
+                                i + 1
+                            ], 
+                            (err, res) => {
                             if (err) throw err
                             console.log('\n -------------------------------------- \n');
                             console.table(res)
