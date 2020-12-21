@@ -23,17 +23,5 @@ VALUES
   ('Dwayne', 'Carter', 3, 2),
   ('Jacques', 'Webster', 4, 1),
   ('Austin', 'Post', 4, 2);
-SELECT
-  employee.id,
-  first_name,
-  last_name,
-  title,
-  department_name,
-  salary,
-  manager_id
-FROM
-  employee
-  INNER JOIN role_info ON employee.role_id = role_info.id
-  INNER JOIN department ON role_info.department_id = department.id
-WHERE
-  department.department_name = Engineering;
+
+SELECT title FROM role_info

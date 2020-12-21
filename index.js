@@ -68,7 +68,8 @@ const init = () => {
 };
 
 const queryAll = () => {
-    connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, CONCAT FROM employee INNER JOIN role_info ON employee.role_id = role_info.id INNER JOIN department ON role_info.department_id = department.id ALTER TABLE employee ADD manager VARCHAR(30) ;', (err, res) => {
+    connection.query(
+        `SELECT e.id, e.first_name, e.last_name, r.title, d.department_name, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager FROM employee e LEFT JOIN role_info r ON e.role_id = r.id LEFT JOIN department d ON r.department_id = d.id LEFT JOIN employee m ON m.id = e.manager_id`, (err, res) => {
         if (err) throw err;
         console.table(res)
         inquirer
@@ -104,7 +105,7 @@ const queryByDepartment = () => {
             .then(answer => {
                 for (let i = 0; i < res.length; i++) {
                     if (res[i].department_name === answer.action) {
-                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.action], (err, res) => {
+                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.action], (err, res) => {
                             if (err) throw err
                             console.log('\n -------------------------------------- \n');
                             console.table(res)
@@ -169,31 +170,36 @@ const queryByManagement = () => {
 };
 
 const addEmployee = () => {
-    inquirer
-        .prompt(
-            {
-                name: "firstName",
-                type: "input",
-                message: "What is their first name?",
-            },
-            {
-                name: "lastName",
-                type: "input",
-                message: "What is their last name?",
-            },
-            {
-                name: "roleId",
-                type: "list",
-                message: "What is their role ID?",
-                choices: () => { }
-            },
-            {
-                name: "managerId",
-                type: "list",
-                message: "Select their manager...",
-                choices: () => { }
-            },
-        )
+    connection.query(
+        'SELECT title, manager.id FROM role_info INNER JOIN employee', (err, res) => {
+            if (err) throw err;
+            inquirer
+                .prompt(
+                    {
+                        name: "firstName",
+                        type: "input",
+                        message: "What is their first name?",
+                    },
+                    {
+                        name: "lastName",
+                        type: "input",
+                        message: "What is their last name?",
+                    },
+                    {
+                        name: "roleId",
+                        type: "list",
+                        message: "What is their role?",
+                        choices: [res.title]
+                    },
+                    {
+                        name: "managerId",
+                        type: "list",
+                        message: "Select their manager...",
+                        choices: () => { }
+                    },
+                )
+        }
+    )
         .then(answer => {
             connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId}, ${answer.managerId})`, (err, res) => {
                 if (err) throw err
@@ -218,7 +224,7 @@ const addEmployee = () => {
 };
 
 const removeEmployee = () => {
-    connection.query(`SELECT CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
+    connection.query(`SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
         inquirer
             .prompt(
                 {
@@ -228,18 +234,33 @@ const removeEmployee = () => {
                     choices: [res.Employees]
                 },
             )
-            // NEXT NEED TO MAKE THE THEN STATEMENT SO THAT WE ACTUALLY REMOVE THE EMPLOYEE THE USER WANTS GONE.
-            
+            .then(answer => {
+                console.log(answer.employee)
+                connection.query(
+                    'DELETE FROM employee WHERE ?',
+                    {
+                        first_name: 1
+                    },
+                    {
+                        last_name: 2
+                    },
+                    (err, res) => {
+                        if (err) throw err;
+                        console.log(res.affectedRows + ' was removed from datebase.\n')
+                    }
+                )
+            })
+
             .then(
                 inquirer
                     .prompt({
                         name: "action",
                         type: "list",
                         message: "What would you like to do?",
-                        choices: ['Add Another Employee', 'Main Menu', 'EXIT']
+                        choices: ['Remove Another Employee', 'Main Menu', 'EXIT']
                     })
                     .then(answer => {
-                        if (answer.action === 'Add Another Employee') addEmployee();
+                        if (answer.action === 'Remove Another Employee') removeEmployee();
                         else if (answer.action === 'Main Menu') init();
                         else connection.end();
                     })
