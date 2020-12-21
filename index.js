@@ -68,7 +68,7 @@ const init = () => {
 };
 
 const queryAll = () => {
-    connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM employee INNER JOIN role_info ON employee.role_id = role_info.id INNER JOIN department ON role_info.department_id = department.id;', (err, res) => {
+    connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, CONCAT FROM employee INNER JOIN role_info ON employee.role_id = role_info.id INNER JOIN department ON role_info.department_id = department.id ALTER TABLE employee ADD manager VARCHAR(30) ;', (err, res) => {
         if (err) throw err;
         console.table(res)
         inquirer
@@ -102,27 +102,117 @@ const queryByDepartment = () => {
                 }
             })
             .then(answer => {
-                let chosenDepartment;
                 for (let i = 0; i < res.length; i++) {
                     if (res[i].department_name === answer.action) {
                         connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.action], (err, res) => {
                             if (err) throw err
                             console.log('\n -------------------------------------- \n');
                             console.table(res)
+                            inquirer
+                                .prompt({
+                                    name: "action",
+                                    type: "list",
+                                    message: "What would you like to do?",
+                                    choices: ['Continue', 'EXIT']
+                                })
+                                .then(answer => {
+                                    if (answer.action === 'Continue') init();
+                                    else connection.end();
+                                });
                         });
-                        inquirer
-                            .prompt({
-                                name: "action",
-                                type: "list",
-                                message: "What would you like to do?",
-                                choices: ['Continue', 'EXIT']
-                            })
-                            .then(answer => {
-                                if (answer.action === 'Continue') init();
-                                else connection.end();
-                            });
                     };
                 }
             })
     });
+};
+
+const queryByManagement = () => {
+    connection.query('SELECT * FROM employee WHERE manager_id IS NULL', (err, res) => {
+        if (err) throw err
+        const choiceArray = [];
+        inquirer
+            .prompt({
+                name: "action",
+                type: "list",
+                message: "Which management team would you like to view?",
+                choices: () => {
+
+                    for (let i = 0; i < res.length; i++) {
+                        choiceArray[i] = `${res[i].first_name} ${res[i].last_name}`
+                    }
+                    return choiceArray;
+                }
+            })
+            .then(answer => {
+                for (let i = 0; i < res.length; i++) {
+                    if (choiceArray[i] === answer.action) {
+                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary, manager_id FROM employee INNER JOIN role_info ON employee.role_id = role_info.id INNER JOIN department ON role_info.department_id = department.id;', [answer.action], (err, res) => {
+                            if (err) throw err
+                            console.log('\n -------------------------------------- \n');
+                            console.table(res)
+                            inquirer
+                                .prompt({
+                                    name: "action",
+                                    type: "list",
+                                    message: "What would you like to do?",
+                                    choices: ['Continue', 'EXIT']
+                                })
+                                .then(answer => {
+                                    if (answer.action === 'Continue') init();
+                                    else connection.end();
+                                });
+                        });
+                    };
+                }
+            })
+    });
+};
+
+const addEmployee = () => {
+    inquirer
+        .prompt(
+            {
+                name: "firstName",
+                type: "input",
+                message: "What is their first name?",
+            },
+            {
+                name: "lastName",
+                type: "input",
+                message: "What is their last name?",
+            },
+            {
+                name: "roleId",
+                type: "list",
+                message: "What is their role ID?",
+                choices: () => { }
+            },
+            {
+                name: "managerId",
+                type: "list",
+                message: "Select their manager...",
+                choices: () => { }
+            },
+        )
+        .then(answer => {
+            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId}, ${answer.managerId})`, (err, res) => {
+                if (err) throw err
+                console.log(`${answer.firstName} ${answer.lastName} was add to the roster.`)
+            })
+        })
+        .then(
+            inquirer
+                .prompt({
+                    name: "action",
+                    type: "list",
+                    message: "What would you like to do?",
+                    choices: ['Add Another Employee', 'Main Menu', 'EXIT']
+                })
+                .then(answer => {
+                    if (answer.action === 'Add Another Employee') addEmployee();
+                    else if (answer.action === 'Main Menu') init();
+                    else connection.end();
+                })
+            
+        )
 };
