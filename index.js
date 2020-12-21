@@ -213,6 +213,37 @@ const addEmployee = () => {
                     else if (answer.action === 'Main Menu') init();
                     else connection.end();
                 })
-            
+
         )
+};
+
+const removeEmployee = () => {
+    connection.query(`SELECT CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
+        inquirer
+            .prompt(
+                {
+                    name: "employee",
+                    type: "list",
+                    message: "Which employee would you like to remove from the roster?",
+                    choices: [res.Employees]
+                },
+            )
+            // NEXT NEED TO MAKE THE THEN STATEMENT SO THAT WE ACTUALLY REMOVE THE EMPLOYEE THE USER WANTS GONE.
+            
+            .then(
+                inquirer
+                    .prompt({
+                        name: "action",
+                        type: "list",
+                        message: "What would you like to do?",
+                        choices: ['Add Another Employee', 'Main Menu', 'EXIT']
+                    })
+                    .then(answer => {
+                        if (answer.action === 'Add Another Employee') addEmployee();
+                        else if (answer.action === 'Main Menu') init();
+                        else connection.end();
+                    })
+
+            )
+    })
 };
