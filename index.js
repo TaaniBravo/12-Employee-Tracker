@@ -1,6 +1,9 @@
 const mysql = require('mysql');
 const inquirer = require('inquirer');
 const cTable = require('console.table')
+const logo = require('asciiart-logo');
+const config = require('./package.json');
+
 const connection = mysql.createConnection({
     host: "localhost",
     port: 3306,
@@ -11,7 +14,7 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log('Welcome...')
+    console.log(logo(config).render());
     init();
 });
 
@@ -84,20 +87,20 @@ const queryAll = () => {
 
     connection.query(
         query, (err, res) => {
-        if (err) throw err;
-        console.table(res)
-        inquirer
-            .prompt({
-                name: "action",
-                type: "list",
-                message: "What would you like to do?",
-                choices: ['Continue', 'EXIT']
-            })
-            .then(answer => {
-                if (answer.action === 'Continue') init();
-                else connection.end();
-            });
-    });
+            if (err) throw err;
+            console.table(res)
+            inquirer
+                .prompt({
+                    name: "action",
+                    type: "list",
+                    message: "What would you like to do?",
+                    choices: ['Continue', 'EXIT']
+                })
+                .then(answer => {
+                    if (answer.action === 'Continue') init();
+                    else connection.end();
+                });
+        });
 };
 
 const queryByDepartment = () => {
@@ -177,26 +180,26 @@ const queryByManagement = () => {
                 // console.log(answer.action)
                 for (let i = 0; i < res.length; i++) {
                     if (choiceArray[i] === answer.action) {
-                        connection.query(query, 
+                        connection.query(query,
                             [
                                 i + 1
-                            ], 
+                            ],
                             (err, res) => {
-                            if (err) throw err
-                            console.log('\n -------------------------------------- \n');
-                            console.table(res)
-                            inquirer
-                                .prompt({
-                                    name: "action",
-                                    type: "list",
-                                    message: "What would you like to do?",
-                                    choices: ['Continue', 'EXIT']
-                                })
-                                .then(answer => {
-                                    if (answer.action === 'Continue') init();
-                                    else connection.end();
-                                });
-                        });
+                                if (err) throw err
+                                console.log('\n -------------------------------------- \n');
+                                console.table(res)
+                                inquirer
+                                    .prompt({
+                                        name: "action",
+                                        type: "list",
+                                        message: "What would you like to do?",
+                                        choices: ['Continue', 'EXIT']
+                                    })
+                                    .then(answer => {
+                                        if (answer.action === 'Continue') init();
+                                        else connection.end();
+                                    });
+                            });
                     };
                 }
             })
@@ -204,101 +207,107 @@ const queryByManagement = () => {
 };
 
 const addEmployee = () => {
-    connection.query(
-        'SELECT title, manager.id FROM role_info INNER JOIN employee', (err, res) => {
-            if (err) throw err;
-            inquirer
-                .prompt(
-                    {
-                        name: "firstName",
-                        type: "input",
-                        message: "What is their first name?",
-                    },
-                    {
-                        name: "lastName",
-                        type: "input",
-                        message: "What is their last name?",
-                    },
-                    {
-                        name: "roleId",
-                        type: "list",
-                        message: "What is their role?",
-                        choices: [res.title]
-                    },
-                    {
-                        name: "managerId",
-                        type: "list",
-                        message: "Select their manager...",
-                        choices: () => { }
-                    },
-                )
-        }
-    )
+    inquirer
+        .prompt(
+            [{
+                name: "firstName",
+                type: "input",
+                message: "What is their first name?",
+            },
+            {
+                name: "lastName",
+                type: "input",
+                message: "What is their last name?",
+            },
+            {
+                name: "roleId",
+                type: "list",
+                message: "What is their role?",
+                choices: () => {
+                    connection.query(
+                        'SELECT title, department_name FROM role_info INNER JOIN department ON role_info.department_id = department.id', (err, res) => {
+                            if (err) throw err;
+                            const roles = []
+                            for(let i = 0; i < res.length; i++) {
+                                roles.push(res[i].title)
+                            }
+                            return roles
+                        })}
+            },
+            {
+                name: "managerId",
+                type: "list",
+                message: "Select their manager...",
+                choices: () => {
+                    connection.query(
+                        'SELECT e.first_name, e.last_name FROM employee e LEFT JOIN employee m ON e.manager_id = m.id', (err, res) => {
+                            if (err) throw err;
+                            return res
+                        })
+                }
+            }]
+        )
         .then(answer => {
             connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId}, ${answer.managerId})`, (err, res) => {
                 if (err) throw err
                 console.log(`${answer.firstName} ${answer.lastName} was add to the roster.`)
+                    .then(
+                        inquirer
+                            .prompt({
+                                name: "action",
+                                type: "list",
+                                message: "What would you like to do?",
+                                choices: ['Add Another Employee', 'Main Menu', 'EXIT']
+                            })
+                            .then(answer => {
+                                if (answer.action === 'Add Another Employee') addEmployee();
+                                else if (answer.action === 'Main Menu') init();
+                                else connection.end();
+                            })
+
+                    )
             })
         })
-        .then(
-            inquirer
-                .prompt({
-                    name: "action",
-                    type: "list",
-                    message: "What would you like to do?",
-                    choices: ['Add Another Employee', 'Main Menu', 'EXIT']
-                })
-                .then(answer => {
-                    if (answer.action === 'Add Another Employee') addEmployee();
-                    else if (answer.action === 'Main Menu') init();
-                    else connection.end();
-                })
-
-        )
 };
 
-const removeEmployee = () => {
-    connection.query(`SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
-        inquirer
-            .prompt(
-                {
-                    name: "employee",
-                    type: "list",
-                    message: "Which employee would you like to remove from the roster?",
-                    choices: [res.Employees]
-                },
-            )
-            .then(answer => {
-                console.log(answer.employee)
-                connection.query(
-                    'DELETE FROM employee WHERE ?',
-                    {
-                        first_name: 1
-                    },
-                    {
-                        last_name: 2
-                    },
-                    (err, res) => {
-                        if (err) throw err;
-                        console.log(res.affectedRows + ' was removed from datebase.\n')
-                    }
-                )
-            })
+// const removeEmployee = () => {
+//     connection.query(`SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
+//         if (err) throw err;
+//         inquirer
+//             .prompt(
+//                 {
+//                     name: "employee",
+//                     type: "list",
+//                     message: "Which employee would you like to remove from the roster?",
+//                     choices: [res.Employees]
+//                 },
+//             )
+//             .then(answer => {
+//                 console.log(answer.employee)
+//                 connection.query(
+//                     'DELETE FROM employee WHERE first_name = AND last_name = ',
+//                     []
+//                     (err, res) => {
+//                         if (err) throw err;
+//                         console.log(res.affectedRows + ' was removed from datebase.\n')
+//                     }
+//                 )
+//             })
 
-            .then(
-                inquirer
-                    .prompt({
-                        name: "action",
-                        type: "list",
-                        message: "What would you like to do?",
-                        choices: ['Remove Another Employee', 'Main Menu', 'EXIT']
-                    })
-                    .then(answer => {
-                        if (answer.action === 'Remove Another Employee') removeEmployee();
-                        else if (answer.action === 'Main Menu') init();
-                        else connection.end();
-                    })
+//             .then(
+//                 inquirer
+//                     .prompt({
+//                         name: "action",
+//                         type: "list",
+//                         message: "What would you like to do?",
+//                         choices: ['Remove Another Employee', 'Main Menu', 'EXIT']
+//                     })
+//                     .then(answer => {
+//                         if (answer.action === 'Remove Another Employee') removeEmployee();
+//                         else if (answer.action === 'Main Menu') init();
+//                         else connection.end();
+//                     })
 
-            )
-    })
-};
+//             )
+//     })
+// };

@@ -1,7 +1,7 @@
 {
-  "name": "12-Employee-Tracker",
+  "name": "Employee-Tracker",
   "version": "1.0.0",
-  "description": "This is the Unit 12 HW assignment for the UW Coding Bootcamp.",
+  "description": "Make management easy with this CLI database tracker.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/TaaniBravo/12-Employee-Tracker#readme",
   "dependencies": {
+    "asciiart-logo": "^0.2.6",
     "console.table": "^0.10.0",
     "inquirer": "^7.3.3",
     "mysql": "^2.18.1"

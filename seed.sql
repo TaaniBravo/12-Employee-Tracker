@@ -23,5 +23,18 @@ VALUES
   ('Dwayne', 'Carter', 3, 2),
   ('Jacques', 'Webster', 4, 1),
   ('Austin', 'Post', 4, 2);
-
-SELECT title FROM role_info
+SELECT
+  e.id,
+  e.first_name,
+  e.last_name,
+  r.title,
+  d.department_name,
+  r.salary,
+  CONCAT(m.first_name, ' ', m.last_name) AS manager
+FROM
+  employee e
+  LEFT JOIN role_info r ON e.role_id = r.id
+  LEFT JOIN department d ON r.department_id = d.id
+  LEFT JOIN employee m ON m.id = e.manager_id
+WHERE
+  m.id = 1
