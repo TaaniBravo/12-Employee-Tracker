@@ -207,6 +207,26 @@ const queryByManagement = () => {
 };
 
 const addEmployee = () => {
+    const roles = []
+    const managers = []
+    const query = `SELECT CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
+
+    const queryTwo = 'Select title, department_name FROM role_info JOIN department ON role_info.department_id = department.id;'
+
+    connection.query(queryTwo, (err, role) => {
+        if (err) throw err;
+        for (let i = 0; i < role.length; i++) {
+            roles.push(role[i].title)
+        }
+    })
+
+    connection.query(query, (err, manager) => {
+        if (err) throw err;
+        for (let i = 0; i < manager.length; i++) {
+            managers.push(manager[i].Manager)
+        }
+    })
+
     inquirer
         .prompt(
             [{
@@ -223,28 +243,13 @@ const addEmployee = () => {
                 name: "roleId",
                 type: "list",
                 message: "What is their role?",
-                choices: () => {
-                    connection.query(
-                        'SELECT title, department_name FROM role_info INNER JOIN department ON role_info.department_id = department.id', (err, res) => {
-                            if (err) throw err;
-                            const roles = []
-                            for(let i = 0; i < res.length; i++) {
-                                roles.push(res[i].title)
-                            }
-                            return roles
-                        })}
+                choices: roles
             },
             {
                 name: "managerId",
                 type: "list",
                 message: "Select their manager...",
-                choices: () => {
-                    connection.query(
-                        'SELECT e.first_name, e.last_name FROM employee e LEFT JOIN employee m ON e.manager_id = m.id', (err, res) => {
-                            if (err) throw err;
-                            return res
-                        })
-                }
+                choices: managers
             }]
         )
         .then(answer => {
