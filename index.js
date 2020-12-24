@@ -1,6 +1,12 @@
 const inquirer = require('inquirer');
 const cTable = require('console.table')
 const db = require('./db');
+const connection = require('./db/connection');
+
+const logo = require('asciiart-logo');
+const config = require('./package.json');
+
+console.log(logo(config).render());
 
 const init = () => {
     inquirer
@@ -59,32 +65,19 @@ const init = () => {
                     // removeDepartment();
                     break;
                 default:
-                    break;
+                    connection.end();
                 
             }
         });
 };
 
 const queryAll = () => {
-    const query = `SELECT
-    e.id,
-    e.first_name,
-    e.last_name,
-    r.title,
-    d.department_name,
-    r.salary,
-    CONCAT(m.first_name, ' ', m.last_name) AS manager
-  FROM
-    employee e
-    LEFT JOIN role_info r ON e.role_id = r.id
-    LEFT JOIN department d ON r.department_id = d.id
-    LEFT JOIN employee m ON m.id = e.manager_id`
-
-    connection.query(
-        query, (err, res) => {
-            if (err) throw err;
-            console.table(res)
-            inquirer
+ 
+    db
+    .getDepartments()
+    .then(results => {
+        console.table(results)
+        inquirer
                 .prompt({
                     name: "action",
                     type: "list",
@@ -95,7 +88,8 @@ const queryAll = () => {
                     if (answer.action === 'Continue') init();
                     else connection.end();
                 });
-        });
+    })
+                  
 };
 
 const queryByDepartment = () => {
@@ -354,3 +348,5 @@ const addEmployee = () => {
 //             )
 //     })
 // };
+
+init();

@@ -1,7 +1,5 @@
 const mysql = require('mysql');
 const util = require('util');
-const logo = require('asciiart-logo');
-const config = require('./package.json');
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -13,9 +11,7 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log(logo(config).render());
-    init();
-    console.log('Connected as id: ' + connection.threadId)
+    console.log('\nConnected as id: ' + connection.threadId)
 });
 
 connection.query = util.promisify(connection.query);
