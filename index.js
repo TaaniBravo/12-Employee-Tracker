@@ -30,7 +30,7 @@ const init = () => {
             ],
         })
         .then(answer => {
-            switch(answer.action) {
+            switch (answer.action) {
                 case 'View All Employees':
                     queryAll();
                     break;
@@ -53,7 +53,7 @@ const init = () => {
                     // updateEmployeeManager();
                     break;
                 case 'Add Role':
-                    // addRole();
+                    addRole();
                     break;
                 case 'Remove Role':
                     // removeRole();
@@ -66,18 +66,18 @@ const init = () => {
                     break;
                 default:
                     connection.end();
-                
+
             }
         });
 };
 
 const queryAll = () => {
- 
+
     db
-    .getDepartments()
-    .then(results => {
-        console.table(results)
-        inquirer
+        .getEmployees()
+        .then(results => {
+            console.table(results)
+            inquirer
                 .prompt({
                     name: "action",
                     type: "list",
@@ -88,49 +88,50 @@ const queryAll = () => {
                     if (answer.action === 'Continue') init();
                     else connection.end();
                 });
-    })
-                  
+        })
+
 };
 
 const queryByDepartment = () => {
-    connection.query('SELECT * FROM department', (err, res) => {
-        if (err) throw err
-        inquirer
-            .prompt({
-                name: "action",
-                type: "list",
-                message: "Which department would you like to view?",
-                choices: () => {
-                    const choiceArray = [];
-                    for (let i = 0; i < res.length; i++) {
-                        choiceArray.push(res[i].department_name);
+    db
+        .getDepartments()
+        .then(results => {
+            inquirer
+                .prompt({
+                    name: "department",
+                    type: "list",
+                    message: "Which department would you like to view?",
+                    choices: () => {
+                        const choiceArray = [];
+                        for (let i = 0; i < results.length; i++) {
+                            choiceArray.push(results[i].department_name);
+                        }
+                        return choiceArray;
                     }
-                    return choiceArray;
-                }
-            })
-            .then(answer => {
-                for (let i = 0; i < res.length; i++) {
-                    if (res[i].department_name === answer.action) {
-                        connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.action], (err, res) => {
-                            if (err) throw err
-                            console.log('\n -------------------------------------- \n');
-                            console.table(res)
-                            inquirer
-                                .prompt({
-                                    name: "action",
-                                    type: "list",
-                                    message: "What would you like to do?",
-                                    choices: ['Continue', 'EXIT']
-                                })
-                                .then(answer => {
-                                    if (answer.action === 'Continue') init();
-                                    else connection.end();
-                                });
-                        });
-                    };
-                }
-            })
-    });
+                })
+                .then(answer => {
+                    for (let i = 0; i < results.length; i++) {
+                        if (results[i].department_name === answer.department) {
+                            connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.department], (err, res) => {
+                                if (err) throw err
+                                console.log('\n -------------------------------------- \n');
+                                console.table(res)
+                                inquirer
+                                    .prompt({
+                                        name: "action",
+                                        type: "list",
+                                        message: "What would you like to do?",
+                                        choices: ['Continue', 'EXIT']
+                                    })
+                                    .then(answer => {
+                                        if (answer.action === 'Continue') init();
+                                        else connection.end();
+                                    });
+                            });
+                        };
+                    }
+                })
+        });
 };
 
 const queryByManagement = () => {
@@ -194,44 +195,6 @@ const queryByManagement = () => {
             })
     });
 };
-
-// const roleDefine = answer => {
-//     const query = `SELECT
-//     *,
-//     CONCAT(m.first_name, ' ', m.last_name) AS manager
-//   FROM
-//     employee e
-//     LEFT JOIN role_info r ON e.role_id = r.id
-//     LEFT JOIN department d ON r.department_id = d.id
-//     LEFT JOIN employee m ON m.id = e.manager_id`
-
-//     connection.query(query, (err, res) => {
-//         if (err) throw err;
-//         for (let i = 0; i < res.length; i++) {
-//             if (res[i].title = answer) return res[i].role_id
-//         }
-//         return 3
-//     })
-// }
-
-// const managerDefine = answer => {
-//     const query = `SELECT
-//     *,
-//     CONCAT(m.first_name, ' ', m.last_name) AS manager
-//   FROM
-//     employee e
-//     LEFT JOIN role_info r ON e.role_id = r.id
-//     LEFT JOIN department d ON r.department_id = d.id
-//     LEFT JOIN employee m ON m.id = e.manager_id`
-
-//     connection.query(query, (err, res) => {
-//         if (err) throw err;
-//         for (let i = 0; i < res.length; i++) {
-//             if (res[i].manager = answer) return res[i].manager_id
-//         }
-//         return null
-//     })
-// }
 
 const addEmployee = () => {
     const query = `SELECT id, CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
@@ -307,46 +270,25 @@ const addEmployee = () => {
         })
 };
 
-// const removeEmployee = () => {
-//     connection.query(`SELECT employee.id, CONCAT(first_name, ' ', last_name) AS Employees FROM employee;`, (err, res) => {
-//         if (err) throw err;
-//         inquirer
-//             .prompt(
-//                 {
-//                     name: "employee",
-//                     type: "list",
-//                     message: "Which employee would you like to remove from the roster?",
-//                     choices: [res.Employees]
-//                 },
-//             )
-//             .then(answer => {
-//                 console.log(answer.employee)
-//                 connection.query(
-//                     'DELETE FROM employee WHERE first_name = AND last_name = ',
-//                     []
-//                     (err, res) => {
-//                         if (err) throw err;
-//                         console.log(res.affectedRows + ' was removed from datebase.\n')
-//                     }
-//                 )
-//             })
+const addRole = () => {
 
-//             .then(
-//                 inquirer
-//                     .prompt({
-//                         name: "action",
-//                         type: "list",
-//                         message: "What would you like to do?",
-//                         choices: ['Remove Another Employee', 'Main Menu', 'EXIT']
-//                     })
-//                     .then(answer => {
-//                         if (answer.action === 'Remove Another Employee') removeEmployee();
-//                         else if (answer.action === 'Main Menu') init();
-//                         else connection.end();
-//                     })
-
-//             )
-//     })
-// };
+    db
+    .getDepartments()
+    .then( departments => {
+        const departmentChoices = departments.map(department => {
+            value: department.id,
+            name: department.name
+        })
+        console.log(departmentChoices)
+        inquirer
+        .prompt([{
+            name: 'department',
+            type: 'input',
+            message: 'Choose a department to add role.',
+            choices: departmentChoices
+        }
+        ])
+    })
+}
 
 init();
