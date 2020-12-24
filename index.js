@@ -206,25 +206,66 @@ const queryByManagement = () => {
     });
 };
 
-const addEmployee = () => {
-    const roles = []
-    const managers = []
-    const query = `SELECT CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
+// const roleDefine = answer => {
+//     const query = `SELECT
+//     *,
+//     CONCAT(m.first_name, ' ', m.last_name) AS manager
+//   FROM
+//     employee e
+//     LEFT JOIN role_info r ON e.role_id = r.id
+//     LEFT JOIN department d ON r.department_id = d.id
+//     LEFT JOIN employee m ON m.id = e.manager_id`
 
-    const queryTwo = 'Select title, department_name FROM role_info JOIN department ON role_info.department_id = department.id;'
+//     connection.query(query, (err, res) => {
+//         if (err) throw err;
+//         for (let i = 0; i < res.length; i++) {
+//             if (res[i].title = answer) return res[i].role_id
+//         }
+//         return 3
+//     })
+// }
+
+// const managerDefine = answer => {
+//     const query = `SELECT
+//     *,
+//     CONCAT(m.first_name, ' ', m.last_name) AS manager
+//   FROM
+//     employee e
+//     LEFT JOIN role_info r ON e.role_id = r.id
+//     LEFT JOIN department d ON r.department_id = d.id
+//     LEFT JOIN employee m ON m.id = e.manager_id`
+
+//     connection.query(query, (err, res) => {
+//         if (err) throw err;
+//         for (let i = 0; i < res.length; i++) {
+//             if (res[i].manager = answer) return res[i].manager_id
+//         }
+//         return null
+//     })
+// }
+
+const addEmployee = () => {
+    const roles = [];
+    const managers = [];
+    const query = `SELECT id, CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
+
+    const queryTwo = 'Select id, title, salary FROM role_info'
 
     connection.query(queryTwo, (err, role) => {
         if (err) throw err;
-        for (let i = 0; i < role.length; i++) {
-            roles.push(role[i].title)
-        }
+        const roles = role.map(({id, title, salary}) => ({
+            id: `${id}`,
+            title: `${title}`,
+            salary: `${salary}`
+        }))
     })
 
     connection.query(query, (err, manager) => {
         if (err) throw err;
-        for (let i = 0; i < manager.length; i++) {
-            managers.push(manager[i].Manager)
-        }
+        const managers = manager.map(({id, Manager}) => ({
+            id: `${id}`,
+            name: `${Manager}`,
+        }))
     })
 
     inquirer
@@ -243,7 +284,7 @@ const addEmployee = () => {
                 name: "roleId",
                 type: "list",
                 message: "What is their role?",
-                choices: roles
+                choices: [roles.title]
             },
             {
                 name: "managerId",
@@ -253,7 +294,9 @@ const addEmployee = () => {
             }]
         )
         .then(answer => {
-            connection.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId}, ${answer.managerId})`, (err, res) => {
+            const queryThree = `INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId.id}, ${answer.managerId.id})`
+
+            connection.query(queryThree, (err, res) => {
                 if (err) throw err
                 console.log(`${answer.firstName} ${answer.lastName} was add to the roster.`)
                     .then(
