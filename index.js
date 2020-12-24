@@ -245,28 +245,28 @@ const queryByManagement = () => {
 // }
 
 const addEmployee = () => {
-    const roles = [];
-    const managers = [];
     const query = `SELECT id, CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
-
     const queryTwo = 'Select id, title, salary FROM role_info'
 
-    connection.query(queryTwo, (err, role) => {
-        if (err) throw err;
-        const roles = role.map(({id, title, salary}) => ({
-            id: `${id}`,
-            title: `${title}`,
-            salary: `${salary}`
-        }))
-    })
+    const roles =
+        connection.query(queryTwo, (err, role) => {
+            if (err) throw err;
+            role.map(({ id, title }) => ({
+                value: `${id}`,
+                name: `${title}`
+            }))
+        })
 
-    connection.query(query, (err, manager) => {
-        if (err) throw err;
-        const managers = manager.map(({id, Manager}) => ({
-            id: `${id}`,
-            name: `${Manager}`,
-        }))
-    })
+    console.log(roles)
+
+    const managers =
+        connection.query(query, (err, manager) => {
+            if (err) throw err;
+            manager.map(({ id, Manager }) => ({
+                value: `${id}`,
+                name: `${Manager}`,
+            }))
+        })
 
     inquirer
         .prompt(
@@ -284,7 +284,7 @@ const addEmployee = () => {
                 name: "roleId",
                 type: "list",
                 message: "What is their role?",
-                choices: [roles.title]
+                choices: roles
             },
             {
                 name: "managerId",
