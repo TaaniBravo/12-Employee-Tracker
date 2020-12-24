@@ -16,41 +16,52 @@ const init = () => {
                 'Remove Employee',
                 'Update Employee Role',
                 'Update Employee Manager',
+                'Add Role',
+                'Remove Role',
+                'Add Department',
+                'Remove Department',
                 'EXIT'
             ],
         })
         .then(answer => {
-            if (answer.action === 'View All Employees') {
-                console.log('\n -------------------------------------- \n');
-                queryAll();
+            switch(answer.action) {
+                case 'View All Employees':
+                    queryAll();
+                    break;
+                case 'View All Employees By Department':
+                    queryByDepartment();
+                    break;
+                case 'View All Employees By Management':
+                    queryByManagement();
+                    break;
+                case 'Add Employee':
+                    addEmployee();
+                    break;
+                case 'Remove Employee':
+                    removeEmployee();
+                    break;
+                case 'Update Employee Role':
+                    // updateEmployeeRole();
+                    break;
+                case 'Update Employee Manager':
+                    // updateEmployeeManager();
+                    break;
+                case 'Add Role':
+                    // addRole();
+                    break;
+                case 'Remove Role':
+                    // removeRole();
+                    break;
+                case 'Add Department':
+                    // addDepartment();
+                    break;
+                case 'Remove Department':
+                    // removeDepartment();
+                    break;
+                default:
+                    break;
+                
             }
-            else if (answer.action === 'View All Employees By Department') {
-                console.log('\n -------------------------------------- \n');
-                queryByDepartment();
-            }
-            else if (answer.action === 'View All Employees By Management') {
-                console.log('\n -------------------------------------- \n');
-                queryByManagement();
-            }
-            else if (answer.action === 'Add Employee') {
-                console.log('\n -------------------------------------- \n');
-                addEmployee();
-            }
-            else if (answer.action === 'Remove Employee') {
-                console.log('\n -------------------------------------- \n');
-                removeEmployee();
-            }
-            else if (answer.action === 'Update Employee Role') {
-                console.log('\n -------------------------------------- \n');
-                updateRole();
-            }
-            else if (answer.action === 'Update Employee Manager') {
-                console.log('\n -------------------------------------- \n');
-                updateEmployeeManager();
-            }
-            else {
-                connection.end();
-            };
         });
 };
 
