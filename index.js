@@ -251,9 +251,9 @@ const addEmployee = () => {
     const roles =
         connection.query(queryTwo, (err, role) => {
             if (err) throw err;
-            role.map(({ id, title }) => ({
-                value: `${id}`,
-                name: `${title}`
+            role.map(({ value, name }) => ({
+                value: `${role.id}`,
+                name: `${role.title}`
             }))
         })
 
