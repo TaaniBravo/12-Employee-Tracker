@@ -9,7 +9,7 @@ module.exports = {
 
     getRoles() {
 
-        return connection.query('SELECT * FROM role_info')
+        return connection.query('SELECT * FROM role')
 
     },
 
@@ -25,7 +25,7 @@ module.exports = {
         CONCAT(m.first_name, ' ', m.last_name) AS manager
       FROM
         employee e
-        LEFT JOIN role_info r ON e.role_id = r.id
+        LEFT JOIN role r ON e.role_id = r.id
         LEFT JOIN department d ON r.department_id = d.id
         LEFT JOIN employee m ON m.id = e.manager_id`)
 
@@ -33,7 +33,7 @@ module.exports = {
 
     insertRole(data) {
 
-        return connection.query(`INSERT INTO role_info SET ?`, 
+        return connection.query(`INSERT INTO role SET ?`, 
         {
             title: data.title,
             salary: data.salary,

@@ -13,7 +13,7 @@ CREATE TABLE role (
     title VARCHAR(100) NOT NULL,
     salary DECIMAL(65),
     department_id INT,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
     FOREIGN KEY (department_id)
         REFERENCES department(id)
 );
@@ -24,9 +24,9 @@ CREATE TABLE employee (
     last_name VARCHAR(30) NOT NULL,
     role_id INT NOT NULL,
     manager_id INT,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
     FOREIGN KEY (role_id)
-        REFERENCES role(id)
+        REFERENCES role(id),
     FOREIGN KEY (manager_id)
         REFERENCES employee(id)
 );
