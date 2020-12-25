@@ -72,5 +72,32 @@ module.exports = {
                 department_id: data.department_id
             }
         )
+    },
+
+    deleteRole(data) {
+
+        return connection.query('DELETE FROM role WHERE ?',
+        {
+            id: data.roleId
+        })
+    },
+
+    insertEmployee(data) {
+
+        return connection.query('INSERT INTO employee SET ?',
+        {
+            first_name: data.firstName,
+            last_name: data.lastName,
+            role_id: data.roleId
+        }
+        )
+    },
+
+    deleteEmployee(data) {
+
+        return connection.query('DELETE FROM employee WHERE ?',
+        {
+            id: data.employeeId
+        })
     }
 }

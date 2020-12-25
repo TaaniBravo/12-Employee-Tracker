@@ -128,105 +128,99 @@ const queryByDepartment = () => {
 
 const queryByManagement = () => {
     db
-    .getManagers()
-    .then(results => {
-        const managementChoices = results.map(managers => ({
-            value: managers.id,
-            name: `${managers.first_name} ${managers.last_name}`
-        }));
-        console.log(managementChoices)
-        inquirer
-            .prompt({
-                name: "manager",
-                type: "list",
-                message: "Which management team would you like to view?",
-                choices: managementChoices
-            })
-            .then(answer => {
-                db
-                .getManagerTeam(answer)
-                .then(team => {
-                    console.log(' ')
-                    console.table(team);
-                    init();
+        .getManagers()
+        .then(results => {
+            const managementChoices = results.map(managers => ({
+                value: managers.id,
+                name: `${managers.first_name} ${managers.last_name}`
+            }));
+            console.log(managementChoices)
+            inquirer
+                .prompt({
+                    name: "manager",
+                    type: "list",
+                    message: "Which management team would you like to view?",
+                    choices: managementChoices
                 })
-            })
-    });
+                .then(answer => {
+                    db
+                        .getManagerTeam(answer)
+                        .then(team => {
+                            console.log(' ')
+                            console.table(team);
+                            init();
+                        })
+                })
+        });
 };
 
 const addEmployee = () => {
-    const query = `SELECT id, CONCAT(first_name, ' ', last_name) AS Manager FROM employee WHERE manager_id IS NULL;`
-    const queryTwo = 'Select id, title, salary FROM role_info'
 
-    const roles =
-        connection.query(queryTwo, (err, role) => {
-            if (err) throw err;
-            role.map(({ value, name }) => ({
-                value: `${role.id}`,
-                name: `${role.title}`
-            }))
+    db
+        .getRoles()
+        .then(results => {
+
+            const roleChoices = results.map(roles => ({
+                value: roles.id,
+                name: roles.title
+            }));
+
+            inquirer
+                .prompt(
+                    [{
+                        name: "firstName",
+                        type: "input",
+                        message: "What is their first name?",
+                    },
+                    {
+                        name: "lastName",
+                        type: "input",
+                        message: "What is their last name?",
+                    },
+                    {
+                        name: "roleId",
+                        type: "list",
+                        message: "What is their role?",
+                        choices: roleChoices
+                    },
+                    ])
+                .then(employee => {
+                    db
+                        .insertEmployee(employee)
+                    console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n PLEASE UPDATE their manager.`)
+                    init();
+                })
+        })
+}
+
+const removeEmployee = () => {
+    db
+        .getEmployees()
+        .then(employees => {
+            const employeeChoices = employees.map(employee => ({
+                value: employee.id,
+                name: `${employee.first_name} ${employee.last_name}`
+            }));
+
+            inquirer
+                .prompt(
+                    [{
+                        name: "employeeId",
+                        type: "list",
+                        message: "Who would you like to remove from the roster?",
+                        choices: employeeChoices
+                    }
+                    ])
+                .then(answer => {
+                    console.log(answer)
+                    db
+                    .deleteEmployee(answer)
+                    console.log('Employee was removed from the database...\n')
+                    init();
+                })
         })
 
-    console.log(roles)
-
-    const managers =
-        connection.query(query, (err, manager) => {
-            if (err) throw err;
-            manager.map(({ id, Manager }) => ({
-                value: `${id}`,
-                name: `${Manager}`,
-            }))
-        })
-
-    inquirer
-        .prompt(
-            [{
-                name: "firstName",
-                type: "input",
-                message: "What is their first name?",
-            },
-            {
-                name: "lastName",
-                type: "input",
-                message: "What is their last name?",
-            },
-            {
-                name: "roleId",
-                type: "list",
-                message: "What is their role?",
-                choices: roles
-            },
-            {
-                name: "managerId",
-                type: "list",
-                message: "Select their manager...",
-                choices: managers
-            }]
-        )
-        .then(answer => {
-            const queryThree = `INSERT INTO employee (first_name, last_name, role_id, manager_id VALUES (${answer.firstName}, ${answer.lastName}, ${answer.roleId.id}, ${answer.managerId.id})`
-
-            connection.query(queryThree, (err, res) => {
-                if (err) throw err
-                console.log(`${answer.firstName} ${answer.lastName} was add to the roster.`)
-                    .then(
-                        inquirer
-                            .prompt({
-                                name: "action",
-                                type: "list",
-                                message: "What would you like to do?",
-                                choices: ['Add Another Employee', 'Main Menu', 'EXIT']
-                            })
-                            .then(answer => {
-                                if (answer.action === 'Add Another Employee') addEmployee();
-                                else if (answer.action === 'Main Menu') init();
-                                else connection.end();
-                            })
-
-                    )
-            })
-        })
-};
+}
 
 const addRole = () => {
 
@@ -262,11 +256,41 @@ const addRole = () => {
                     },
                 ])
                 .then(answer => {
-                    insertRole(answer)
+                    db
+                        .insertRole(answer)
                     console.log(`${answer.title} was added to the database.\n`)
                     init();
                 })
         })
+}
+
+const removeRole = () => {
+    db
+        .getRoles()
+        .then(roles => {
+            const roleChoices = roles.map(role => ({
+                value: role.id,
+                name: role.title
+            }));
+
+            inquirer
+                .prompt(
+                    [{
+                        name: "roleId",
+                        type: "list",
+                        message: "Which role would you like to remove?",
+                        choices: roleChoices
+                    }
+                    ])
+                .then(answer => {
+                    console.log(answer)
+                    db
+                    .deleteRole(answer)
+                    console.log('Role was removed from the database...\n')
+                    init();
+                })
+        })
+
 }
 
 init();
