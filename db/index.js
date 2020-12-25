@@ -39,7 +39,7 @@ module.exports = {
     },
 
     getManagers() {
-        return connection.query('SELECT * FROM employee WHERE manager_id IS NULL')
+        return connection.query('SELECT * FROM employee e LEFT JOIN employee m WHERE manager_id IS NULL')
     },
 
     getManagerTeam(data) {
@@ -104,7 +104,8 @@ module.exports = {
         {
             first_name: data.firstName,
             last_name: data.lastName,
-            role_id: data.roleId
+            role_id: data.roleId,
+            manager_id: data.managerId
         }
         )
     },

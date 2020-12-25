@@ -76,17 +76,7 @@ const queryAll = () => {
         .getEmployees()
         .then(results => {
             console.table(results)
-            inquirer
-                .prompt({
-                    name: "action",
-                    type: "list",
-                    message: "What would you like to do?",
-                    choices: ['Continue', 'EXIT']
-                })
-                .then(answer => {
-                    if (answer.action === 'Continue') init();
-                    else connection.end();
-                });
+            init();
         })
 
 };
@@ -156,38 +146,52 @@ const addEmployee = () => {
 
     db
         .getRoles()
-        .then(results => {
+        .then(roles => {
 
-            const roleChoices = results.map(roles => ({
-                value: roles.id,
-                name: roles.title
+            const roleChoices = roles.map(role => ({
+                value: role.id,
+                name: role.title
             }));
 
-            inquirer
-                .prompt(
-                    [{
-                        name: "firstName",
-                        type: "input",
-                        message: "What is their first name?",
-                    },
-                    {
-                        name: "lastName",
-                        type: "input",
-                        message: "What is their last name?",
-                    },
-                    {
-                        name: "roleId",
-                        type: "list",
-                        message: "What is their role?",
-                        choices: roleChoices
-                    },
-                    ])
-                .then(employee => {
-                    db
-                        .insertEmployee(employee)
-                    console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n PLEASE UPDATE their manager.`)
-                    findManager(employee.roleId)
-                    init();
+            db
+                .getManagers()
+                .then(managers => {
+                    const managementChoices = managers.map(manager => ({
+                        value: manager.id,
+                        name: `${manager.first_name} ${manager.last_name}`
+                    }));
+
+                    inquirer
+                        .prompt(
+                            [{
+                                name: "firstName",
+                                type: "input",
+                                message: "What is their first name?",
+                            },
+                            {
+                                name: "lastName",
+                                type: "input",
+                                message: "What is their last name?",
+                            },
+                            {
+                                name: "roleId",
+                                type: "list",
+                                message: "What is their role?",
+                                choices: roleChoices
+                            },
+                            {
+                                name: "managerId",
+                                type: "list",
+                                message: "Select their manager.",
+                                choices: managementChoices
+                            },
+                            ])
+                        .then(employee => {
+                            db
+                                .insertEmployee(employee)
+                            console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n PLEASE UPDATE their manager.`)
+                            init();
+                        })
                 })
         })
 }
