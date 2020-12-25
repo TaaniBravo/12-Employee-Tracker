@@ -5,6 +5,7 @@ const connection = require('./db/connection');
 
 const logo = require('asciiart-logo');
 const config = require('./package.json');
+const { insertRole } = require('./db');
 
 console.log(logo(config).render());
 
@@ -273,22 +274,42 @@ const addEmployee = () => {
 const addRole = () => {
 
     db
-    .getDepartments()
-    .then( departments => {
-        const departmentChoices = departments.map(department => {
-            value: department.id,
-            name: department.name
+        .getDepartments()
+        .then(departments => {
+
+            const departmentChoices = departments.map(department => ({
+                value: department.id,
+                name: department.department_name
+            }))
+
+            console.log(departmentChoices)
+
+            inquirer
+                .prompt([
+
+                    {
+                        name: 'title',
+                        type: 'input',
+                        message: 'What`s the title of this role?'
+                    },
+                    {
+                        name: 'salary',
+                        type: 'number',
+                        message: 'How much is this role`s salary?'
+                    },
+                    {
+                        name: 'department_id',
+                        type: 'list',
+                        message: 'Choose a department to add role.',
+                        choices: departmentChoices
+                    },
+                ])
+                .then(answer => {
+                    insertRole(answer)
+                    console.log(`${answer.title} was added to the database.\n`)
+                    init();
+                })
         })
-        console.log(departmentChoices)
-        inquirer
-        .prompt([{
-            name: 'department',
-            type: 'input',
-            message: 'Choose a department to add role.',
-            choices: departmentChoices
-        }
-        ])
-    })
 }
 
 init();

@@ -30,4 +30,15 @@ module.exports = {
         LEFT JOIN employee m ON m.id = e.manager_id`)
 
     },
+
+    insertRole(data) {
+
+        return connection.query(`INSERT INTO role_info SET ?`, 
+        {
+            title: data.title,
+            salary: data.salary,
+            department_id: data.department_id
+        }
+        )
+    }
 }
