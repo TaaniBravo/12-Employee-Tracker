@@ -113,22 +113,13 @@ const queryByDepartment = () => {
                 .then(answer => {
                     for (let i = 0; i < results.length; i++) {
                         if (results[i].department_name === answer.department) {
-                            connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary FROM department INNER JOIN role_info ON role_info.department_id = department.id INNER JOIN employee ON employee.role_id = role_info.id WHERE department_name = ?;', [answer.department], (err, res) => {
-                                if (err) throw err
-                                console.log('\n -------------------------------------- \n');
-                                console.table(res)
-                                inquirer
-                                    .prompt({
-                                        name: "action",
-                                        type: "list",
-                                        message: "What would you like to do?",
-                                        choices: ['Continue', 'EXIT']
-                                    })
-                                    .then(answer => {
-                                        if (answer.action === 'Continue') init();
-                                        else connection.end();
-                                    });
-                            });
+                            db
+                                .getSpecificDepartment(answer)
+                                .then(department => {
+                                    console.log('\n -------------------------------------- \n');
+                                    console.table(department)
+                                    init();
+                                });
                         };
                     }
                 })

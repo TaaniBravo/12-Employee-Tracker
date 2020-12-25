@@ -31,6 +31,13 @@ module.exports = {
 
     },
 
+    getSpecificDepartment(data) {
+        return connection.query('SELECT employee.id, first_name, last_name, title, department_name, salary FROM department INNER JOIN role ON role.department_id = department.id INNER JOIN employee ON employee.role_id = role.id WHERE department_name = ?;',
+        [
+            data.department
+        ])
+    },
+
     insertRole(data) {
 
         return connection.query(`INSERT INTO role SET ?`, 
