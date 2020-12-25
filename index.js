@@ -167,6 +167,18 @@ const addEmployee = () => {
                         name: `${manager.first_name} ${manager.last_name}`
                     }));
 
+                    if (managementChoices.length !== 0) managementChoices.push({
+                        value: null,
+                        name: 'They don`t have a manager.'
+                    })
+
+                    if (typeof managementChoices !== 'undefined' && managementChoices.length === 0) {
+                        managementChoices.push({
+                            value: null,
+                            name: 'No managers in database yet. Press Enter to continue.'
+                        })
+                    }
+
                     inquirer
                         .prompt(
                             [{
@@ -185,7 +197,7 @@ const addEmployee = () => {
                                 message: "What is their role?",
                                 choices: roleChoices
                             },
-                            {
+                            {   
                                 name: "managerId",
                                 type: "list",
                                 message: "Select their manager.",
@@ -401,6 +413,11 @@ const changeEmployeeManager = () => {
                         value: manager.id,
                         name: `${manager.first_name} ${manager.last_name}`
                     }));
+
+                    managementChoices.push({
+                        value: null,
+                        name: 'They don`t have a manager.'
+                    });
 
                     inquirer
                         .prompt(
