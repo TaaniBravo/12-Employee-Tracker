@@ -1,11 +1,11 @@
 const inquirer = require('inquirer');
 const cTable = require('console.table')
 const db = require('./db');
-const connection = require('./db/connection');
+// const connection = require('./db/connection');
 
 const logo = require('asciiart-logo');
 const config = require('./package.json');
-const { insertRole } = require('./db');
+// const { insertRole } = require('./db');
 
 console.log(logo(config).render());
 
@@ -48,22 +48,22 @@ const init = () => {
                     removeEmployee();
                     break;
                 case 'Update Employee Role':
-                    // updateEmployeeRole();
+                    updateEmployeeRole();
                     break;
                 case 'Update Employee Manager':
-                    // updateEmployeeManager();
+                    updateEmployeeManager();
                     break;
                 case 'Add Role':
                     addRole();
                     break;
                 case 'Remove Role':
-                    // removeRole();
+                    removeRole();
                     break;
                 case 'Add Department':
-                    // addDepartment();
+                    addDepartment();
                     break;
                 case 'Remove Department':
-                    // removeDepartment();
+                    removeDepartment();
                     break;
                 default:
                     connection.end();
@@ -127,63 +127,29 @@ const queryByDepartment = () => {
 };
 
 const queryByManagement = () => {
-    connection.query('SELECT * FROM employee WHERE manager_id IS NULL', (err, res) => {
-        if (err) throw err
-        const choiceArray = [];
+    db
+    .getManagers()
+    .then(results => {
+        const managementChoices = results.map(managers => ({
+            value: managers.id,
+            name: `${managers.first_name} ${managers.last_name}`
+        }));
+        console.log(managementChoices)
         inquirer
             .prompt({
-                name: "action",
+                name: "manager",
                 type: "list",
                 message: "Which management team would you like to view?",
-                choices: () => {
-
-                    for (let i = 0; i < res.length; i++) {
-                        choiceArray[i] = `${res[i].first_name} ${res[i].last_name}`
-                    }
-                    return choiceArray;
-                }
+                choices: managementChoices
             })
             .then(answer => {
-                const query = `SELECT
-                e.id,
-                e.first_name,
-                e.last_name,
-                r.title,
-                d.department_name,
-                r.salary,
-                CONCAT(m.first_name, ' ', m.last_name) AS manager
-              FROM
-                employee e
-                LEFT JOIN role_info r ON e.role_id = r.id
-                LEFT JOIN department d ON r.department_id = d.id
-                LEFT JOIN employee m ON m.id = e.manager_id
-              WHERE
-                m.id = ?`
-                // console.log(answer.action)
-                for (let i = 0; i < res.length; i++) {
-                    if (choiceArray[i] === answer.action) {
-                        connection.query(query,
-                            [
-                                i + 1
-                            ],
-                            (err, res) => {
-                                if (err) throw err
-                                console.log('\n -------------------------------------- \n');
-                                console.table(res)
-                                inquirer
-                                    .prompt({
-                                        name: "action",
-                                        type: "list",
-                                        message: "What would you like to do?",
-                                        choices: ['Continue', 'EXIT']
-                                    })
-                                    .then(answer => {
-                                        if (answer.action === 'Continue') init();
-                                        else connection.end();
-                                    });
-                            });
-                    };
-                }
+                db
+                .getManagerTeam(answer)
+                .then(team => {
+                    console.log(' ')
+                    console.table(team);
+                    init();
+                })
             })
     });
 };
