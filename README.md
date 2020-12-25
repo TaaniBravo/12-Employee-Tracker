@@ -27,11 +27,11 @@ So that I can organize and plan my business
     5. If you opt to create your roster from scratch you will NEED to ADD a department, role, and then employee in this order. Otherwise program will not work as the CLI works dynamically with the tables.
 
 ## Usage
-![example image]()
+![example image](./assets/example.png)
 
     This program is great for keeping track of a roster of employees, their company information, and updating the company of employees added/removed.
 
-[Video Link](https://github.com/TaaniBravo)
+[Video Link](http://www.youtube.com/watch?v=abEy52xjh1I)
 
 ## Credits
 Anthony Brown (Instructor) - Anthony showed us in class a great way to modularize our program and in turn really made this homework a lot more understandable then when I initial tried to work through it completely blind.
