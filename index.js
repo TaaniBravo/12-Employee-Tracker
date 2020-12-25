@@ -214,7 +214,7 @@ const removeEmployee = () => {
                 .then(answer => {
                     console.log(answer)
                     db
-                    .deleteEmployee(answer)
+                        .deleteEmployee(answer)
                     console.log('Employee was removed from the database...\n')
                     init();
                 })
@@ -285,7 +285,53 @@ const removeRole = () => {
                 .then(answer => {
                     console.log(answer)
                     db
-                    .deleteRole(answer)
+                        .deleteRole(answer)
+                    console.log('Role was removed from the database...\n')
+                    init();
+                })
+        })
+
+}
+
+const addDepartment = () => {
+    inquirer
+        .prompt([
+            {
+                name: 'department_name',
+                type: 'input',
+                message: 'What is the department name?'
+            },
+        ])
+        .then(answer => {
+            db
+                .insertDepartment(answer)
+            console.log(`${answer.department - name} was added to the database.\n`)
+            init();
+        })
+}
+
+const removeDepartment = () => {
+    db
+        .getRoles()
+        .then(roles => {
+            const roleChoices = roles.map(role => ({
+                value: role.id,
+                name: role.title
+            }));
+
+            inquirer
+                .prompt(
+                    [{
+                        name: "roleId",
+                        type: "list",
+                        message: "Which role would you like to remove?",
+                        choices: roleChoices
+                    }
+                    ])
+                .then(answer => {
+                    console.log(answer)
+                    db
+                        .deleteRole(answer)
                     console.log('Role was removed from the database...\n')
                     init();
                 })

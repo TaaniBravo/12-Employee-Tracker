@@ -63,6 +63,13 @@ module.exports = {
                 ])
     },
 
+    insertDepartment(data) {
+        return ('INSERT INTO department SET ?',
+        {
+            department_name: data.department_name
+        })
+    },
+
     insertRole(data) {
 
         return connection.query(`INSERT INTO role SET ?`,
