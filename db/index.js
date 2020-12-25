@@ -126,5 +126,16 @@ module.exports = {
         {
             id: data.employeeId
         }])
+    },
+
+    updateEmployeeManager(data) {
+
+        return connection.query('UPDATE employee SET ? WHERE ?',
+        [{
+            manager_id: data.newManager
+        },
+        {
+            id: data.employeeId
+        }])
     }
 }

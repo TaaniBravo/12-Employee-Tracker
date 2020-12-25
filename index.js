@@ -1,11 +1,9 @@
 const inquirer = require('inquirer');
 const cTable = require('console.table')
 const db = require('./db');
-// const connection = require('./db/connection');
 
 const logo = require('asciiart-logo');
 const config = require('./package.json');
-// const { insertRole } = require('./db');
 
 console.log(logo(config).render());
 
@@ -21,12 +19,12 @@ const init = () => {
                 'View All Employees By Management',
                 'Add Employee',
                 'Remove Employee',
-                'Update Employee Role',
-                'Update Employee Manager',
                 'Add Role',
                 'Remove Role',
                 'Add Department',
                 'Remove Department',
+                'Update Employee Role',
+                'Update Employee Manager',
                 'EXIT'
             ],
         })
@@ -47,12 +45,6 @@ const init = () => {
                 case 'Remove Employee':
                     removeEmployee();
                     break;
-                case 'Update Employee Role':
-                    updateEmployeeRole();
-                    break;
-                case 'Update Employee Manager':
-                    updateEmployeeManager();
-                    break;
                 case 'Add Role':
                     addRole();
                     break;
@@ -64,6 +56,12 @@ const init = () => {
                     break;
                 case 'Remove Department':
                     removeDepartment();
+                    break;
+                case 'Update Employee Role':
+                    changeEmployeeRole();
+                    break;
+                case 'Update Employee Manager':
+                    changeEmployeeManager();
                     break;
                 default:
                     connection.end();
@@ -188,6 +186,7 @@ const addEmployee = () => {
                     db
                         .insertEmployee(employee)
                     console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n PLEASE UPDATE their manager.`)
+                    findManager(employee.roleId)
                     init();
                 })
         })
@@ -338,7 +337,7 @@ const removeDepartment = () => {
 
 }
 
-const updateEmployeeRole = () => {
+const changeEmployeeRole = () => {
     db
         .getEmployees()
         .then(employees => {
@@ -380,7 +379,7 @@ const updateEmployeeRole = () => {
         })
 }
 
-const updateEmployeeManager = () => {
+const changeEmployeeManager = () => {
     db
         .getEmployees()
         .then(employees => {
@@ -390,11 +389,11 @@ const updateEmployeeManager = () => {
             }));
 
             db
-                .getRoles()
-                .then(roles => {
-                    const roleChoices = roles.map(role => ({
-                        value: role.id,
-                        name: role.title
+                .getManagers()
+                .then(managers => {
+                    const managementChoices = managers.map(manager => ({
+                        value: manager.id,
+                        name: `${manager.first_name} ${manager.last_name}`
                     }));
 
                     inquirer
@@ -406,15 +405,15 @@ const updateEmployeeManager = () => {
                                 choices: employeeChoices
                             },
                             {
-                                name: "newRole",
+                                name: "newManager",
                                 type: "list",
-                                message: "What is their new role?",
-                                choices: roleChoices
+                                message: "Who is their new manager?",
+                                choices: managementChoices
                             },
                             ])
                         .then(answer => {
                             db
-                                .updateEmployeeRole(answer)
+                                .updateEmployeeManager(answer)
                             console.log(`Information updated... \n`)
                             init();
                         })
