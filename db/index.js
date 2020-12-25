@@ -70,6 +70,15 @@ module.exports = {
         })
     },
 
+    deleteDepartment(data) {
+
+        return connection.query('DELETE FROM department WHERE ?',
+        {
+            id: data.departmentId
+        })
+    },
+
+
     insertRole(data) {
 
         return connection.query(`INSERT INTO role SET ?`,
@@ -106,5 +115,16 @@ module.exports = {
         {
             id: data.employeeId
         })
+    },
+
+    updateEmployeeRole(data) {
+
+        return connection.query('UPDATE employee SET ? WHERE ?',
+        [{
+            role_id: data.newRole
+        },
+        {
+            id: data.employeeId
+        }])
     }
 }

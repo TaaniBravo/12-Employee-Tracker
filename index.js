@@ -312,31 +312,114 @@ const addDepartment = () => {
 
 const removeDepartment = () => {
     db
-        .getRoles()
-        .then(roles => {
-            const roleChoices = roles.map(role => ({
-                value: role.id,
-                name: role.title
+        .getDepartments()
+        .then(departments => {
+            const departmentChoices = departments.map(department => ({
+                value: department.id,
+                name: department.department_name
             }));
 
             inquirer
                 .prompt(
                     [{
-                        name: "roleId",
+                        name: "departmentId",
                         type: "list",
-                        message: "Which role would you like to remove?",
-                        choices: roleChoices
+                        message: "Which department would you like to remove?",
+                        choices: departmentChoices
                     }
                     ])
                 .then(answer => {
-                    console.log(answer)
                     db
-                        .deleteRole(answer)
-                    console.log('Role was removed from the database...\n')
+                        .deleteDepartment(answer)
+                    console.log('Department was removed from the database...\n')
                     init();
                 })
         })
 
+}
+
+const updateEmployeeRole = () => {
+    db
+        .getEmployees()
+        .then(employees => {
+            const employeeChoices = employees.map(employee => ({
+                value: employee.id,
+                name: `${employee.first_name} ${employee.last_name}`
+            }));
+
+            db
+                .getRoles()
+                .then(roles => {
+                    const roleChoices = roles.map(role => ({
+                        value: role.id,
+                        name: role.title
+                    }));
+
+                    inquirer
+                        .prompt(
+                            [{
+                                name: "employeeId",
+                                type: "list",
+                                message: "Which employee`s role would you like to update?",
+                                choices: employeeChoices
+                            },
+                            {
+                                name: "newRole",
+                                type: "list",
+                                message: "What is their new role?",
+                                choices: roleChoices
+                            },
+                            ])
+                        .then(answer => {
+                            db
+                                .updateEmployeeRole(answer)
+                            console.log(`Information updated... \n`)
+                            init();
+                        })
+                })
+        })
+}
+
+const updateEmployeeManager = () => {
+    db
+        .getEmployees()
+        .then(employees => {
+            const employeeChoices = employees.map(employee => ({
+                value: employee.id,
+                name: `${employee.first_name} ${employee.last_name}`
+            }));
+
+            db
+                .getRoles()
+                .then(roles => {
+                    const roleChoices = roles.map(role => ({
+                        value: role.id,
+                        name: role.title
+                    }));
+
+                    inquirer
+                        .prompt(
+                            [{
+                                name: "employeeId",
+                                type: "list",
+                                message: "Which employee`s role would you like to update?",
+                                choices: employeeChoices
+                            },
+                            {
+                                name: "newRole",
+                                type: "list",
+                                message: "What is their new role?",
+                                choices: roleChoices
+                            },
+                            ])
+                        .then(answer => {
+                            db
+                                .updateEmployeeRole(answer)
+                            console.log(`Information updated... \n`)
+                            init();
+                        })
+                })
+        })
 }
 
 init();
