@@ -39,7 +39,7 @@ module.exports = {
     },
 
     getManagers() {
-        return connection.query('SELECT * FROM employee e LEFT JOIN employee m WHERE manager_id IS NULL')
+        return connection.query('SELECT * FROM employee e WHERE manager_id IS NULL')
     },
 
     getManagerTeam(data) {
@@ -64,9 +64,9 @@ module.exports = {
     },
 
     insertDepartment(data) {
-        return ('INSERT INTO department SET ?',
+        return connection.query('INSERT INTO department SET ?',
         {
-            department_name: data.department_name
+            department_name: data.departmentName
         })
     },
 

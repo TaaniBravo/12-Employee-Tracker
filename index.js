@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const cTable = require('console.table')
 const db = require('./db');
+const connection = require('./db/connection')
 
 const logo = require('asciiart-logo');
 const config = require('./package.json');
@@ -64,6 +65,7 @@ const init = () => {
                     changeEmployeeManager();
                     break;
                 default:
+                    console.log('Goodbye...\n')
                     connection.end();
 
             }
@@ -122,7 +124,7 @@ const queryByManagement = () => {
                 value: managers.id,
                 name: `${managers.first_name} ${managers.last_name}`
             }));
-            console.log(managementChoices)
+
             inquirer
                 .prompt({
                     name: "manager",
@@ -189,7 +191,7 @@ const addEmployee = () => {
                         .then(employee => {
                             db
                                 .insertEmployee(employee)
-                            console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n PLEASE UPDATE their manager.`)
+                            console.log(`${employee.firstName} ${employee.lastName} was added to the database.\n`)
                             init();
                         })
                 })
@@ -215,7 +217,6 @@ const removeEmployee = () => {
                     }
                     ])
                 .then(answer => {
-                    console.log(answer)
                     db
                         .deleteEmployee(answer)
                     console.log('Employee was removed from the database...\n')
@@ -235,8 +236,6 @@ const addRole = () => {
                 value: department.id,
                 name: department.department_name
             }))
-
-            console.log(departmentChoices)
 
             inquirer
                 .prompt([
@@ -286,7 +285,6 @@ const removeRole = () => {
                     }
                     ])
                 .then(answer => {
-                    console.log(answer)
                     db
                         .deleteRole(answer)
                     console.log('Role was removed from the database...\n')
@@ -298,17 +296,17 @@ const removeRole = () => {
 
 const addDepartment = () => {
     inquirer
-        .prompt([
+        .prompt(
             {
-                name: 'department_name',
+                name: 'departmentName',
                 type: 'input',
                 message: 'What is the department name?'
             },
-        ])
+        )
         .then(answer => {
             db
                 .insertDepartment(answer)
-            console.log(`${answer.department - name} was added to the database.\n`)
+            console.log(`${answer.departmentName} was added to the database.\n`)
             init();
         })
 }
