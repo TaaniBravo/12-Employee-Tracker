@@ -138,5 +138,12 @@ module.exports = {
         {
             id: data.employeeId
         }])
+    },
+
+    getDepartmentSalary(data) {
+        return connection.query('SELECT SUM(salary) AS Total_Dept_Salary, department_name FROM role INNER JOIN department ON role.department_id = department.id WHERE ?',
+        [{
+            'department.id': data.departmentId
+        }])
     }
 }

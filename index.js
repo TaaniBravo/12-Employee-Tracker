@@ -18,6 +18,7 @@ const init = () => {
                 'View All Employees',
                 'View All Employees By Department',
                 'View All Employees By Management',
+                'View Department Salaries',
                 'Add Employee',
                 'Remove Employee',
                 'Add Role',
@@ -63,6 +64,9 @@ const init = () => {
                     break;
                 case 'Update Employee Manager':
                     changeEmployeeManager();
+                    break;
+                case 'View Department Salaries':
+                    queryDepartmentSalaries();
                     break;
                 default:
                     console.log('Goodbye...\n')
@@ -421,6 +425,36 @@ const changeEmployeeManager = () => {
                         })
                 })
         })
+}
+
+const queryDepartmentSalaries = () => {
+    db
+    .getDepartments()
+    .then(departments => {
+        const departmentChoices = departments.map(department => ({
+            value: department.id,
+            name: department.department_name
+        }));
+
+        inquirer
+        .prompt([
+            {
+                name: "departmentId",
+                type: "list",
+                message: "Which department`s salary total would you like to view?",
+                choices: departmentChoices
+            },
+        ])
+        .then(answer => {
+            console.log(' ')
+            db
+            .getDepartmentSalary(answer)
+            .then(result => {
+                console.table(result)
+                init();
+            })
+        })
+    })
 }
 
 init();
