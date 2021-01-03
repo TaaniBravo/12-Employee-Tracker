@@ -11,7 +11,6 @@ const connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log('\nConnected as id: ' + connection.threadId)
 });
 
 connection.query = util.promisify(connection.query);
