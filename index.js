@@ -18,6 +18,8 @@ const init = () => {
                 'View All Employees',
                 'View All Employees By Department',
                 'View All Employees By Management',
+                'View All Roles',
+                'View All Departments',
                 'View Department Salaries',
                 'Add Employee',
                 'Remove Employee',
@@ -40,6 +42,12 @@ const init = () => {
                     break;
                 case 'View All Employees By Management':
                     queryByManagement();
+                    break;
+                case 'View All Roles':
+                    queryRoles();
+                    break;
+                case 'View All Departments':
+                    queryDepartments();
                     break;
                 case 'Add Employee':
                     addEmployee();
@@ -86,6 +94,24 @@ const queryAll = () => {
         })
 
 };
+
+const queryRoles = () => {
+    db
+    .getRoles()
+    .then(results => {
+        console.table(results)
+        init();
+    })
+}
+
+const queryDepartments = () => {
+    db
+    .getDepartments()
+    .then(results => {
+        console.table(results)
+        init();
+    })
+}
 
 const queryByDepartment = () => {
     db
